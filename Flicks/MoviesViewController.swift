@@ -8,21 +8,24 @@
 
 import UIKit
 
-class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate{
+class MoviesViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate{
 
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var collectionView: UICollectionView!
+
     
     var movies: [NSDictionary]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.navigationController?.navigationBarHidden = true
+        
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: "refreshControlAction:", forControlEvents: UIControlEvents.ValueChanged)
-        tableView.insertSubview(refreshControl, atIndex: 0)
         
-        tableView.dataSource = self
-        tableView.delegate = self
+        collectionView.insertSubview(refreshControl, atIndex: 0)
+        collectionView.dataSource = self
+        collectionView.delegate = self
         
         networkRequest()
 
@@ -32,6 +35,14 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        self.navigationController?.navigationBarHidden = true
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        self.navigationController?.navigationBarHidden = false
     }
     
     func networkRequest(){
@@ -52,7 +63,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                             //NSLog("response: \(responseDictionary)")
                             
                             self.movies = responseDictionary["results"] as? [NSDictionary]
-                            self.tableView.reloadData()
+                            self.collectionView.reloadData()
                     }
                 }
         });
@@ -66,11 +77,11 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         networkRequest()
         // Do the following when the network request comes back successfully:
         // Update tableView data source
-        self.tableView.reloadData()
+        self.collectionView.reloadData()
         refreshControl.endRefreshing()
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int{
         if let movies = movies{
             return movies.count
         } else{
@@ -78,22 +89,29 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         }
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell{
-        let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell{
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
         
         let movie = movies![indexPath.row]
-        let title = movie["title"] as! String
-        let overview = movie["overview"] as! String
         let image = movie["poster_path"] as! String
         
         let url = NSURL(string: "https://image.tmdb.org/t/p/w342\(image)")
         let data = NSData(contentsOfURL: url!)
         
         cell.imageLabel.image = UIImage(data: data!)
-        cell.titleLabel.text = title
-        cell.overviewLabel.text = overview
         
         return cell
+    }
+    
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        self.performSegueWithIdentifier("showDetail", sender: movies![indexPath.row])
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        let viewController = segue.destinationViewController as! CellViewController
+        let movie = sender as! NSDictionary
+        viewController.titleString = movie["title"] as! String
+        viewController.overviewString = movie["overview"] as! String
     }
     
     
