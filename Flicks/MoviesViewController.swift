@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MBProgressHUD
 
 class MoviesViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate{
 
@@ -26,6 +27,8 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
         collectionView.insertSubview(refreshControl, atIndex: 0)
         collectionView.dataSource = self
         collectionView.delegate = self
+        
+        MBProgressHUD.showHUDAddedTo(self.view, animated: true)
         
         networkRequest()
 
@@ -54,14 +57,14 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
             delegate:nil,
             delegateQueue:NSOperationQueue.mainQueue()
         )
-        
+
         let task : NSURLSessionDataTask = session.dataTaskWithRequest(request,
             completionHandler: { (dataOrNil, response, error) in
                 if let data = dataOrNil {
                     if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
                         data, options:[]) as? NSDictionary {
                             //NSLog("response: \(responseDictionary)")
-                            
+                            MBProgressHUD.hideHUDForView(self.view, animated: true)
                             self.movies = responseDictionary["results"] as? [NSDictionary]
                             self.collectionView.reloadData()
                     }
@@ -110,6 +113,10 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         let viewController = segue.destinationViewController as! CellViewController
         let movie = sender as! NSDictionary
+        
+        let image = movie["poster_path"] as! String
+        
+        viewController.imageString = "https://image.tmdb.org/t/p/w342\(image)"
         viewController.titleString = movie["title"] as! String
         viewController.overviewString = movie["overview"] as! String
     }

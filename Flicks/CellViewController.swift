@@ -12,13 +12,19 @@ class CellViewController: UIViewController {
     
     var titleString: String = ""
     var overviewString: String = ""
+    var imageString: String = ""
     
     @IBOutlet weak var titleOutlet: UILabel!
     @IBOutlet weak var overviewOutlet: UILabel!
+    @IBOutlet weak var imageOutlet: UIImageView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let url = NSURL(string: imageString)
+        let data = NSData(contentsOfURL: url!)
+        
+        imageOutlet.image = UIImage(data: data!)
         titleOutlet.text = titleString
         overviewOutlet.text = overviewString
 
