@@ -12,6 +12,7 @@ import MBProgressHUD
 class MoviesViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate{
 
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var networkErrorView: UIView!
 
     
     var movies: [NSDictionary]?
@@ -64,8 +65,10 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
                     if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
                         data, options:[]) as? NSDictionary {
                             //NSLog("response: \(responseDictionary)")
+                            
                             MBProgressHUD.hideHUDForView(self.view, animated: true)
                             self.movies = responseDictionary["results"] as? [NSDictionary]
+                            
                             self.collectionView.reloadData()
                     }
                 }
@@ -99,9 +102,11 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
         let image = movie["poster_path"] as! String
         
         let url = NSURL(string: "https://image.tmdb.org/t/p/w342\(image)")
-        let data = NSData(contentsOfURL: url!)
+        let dataornil = NSData(contentsOfURL: url!)
         
-        cell.imageLabel.image = UIImage(data: data!)
+        if let data = dataornil{
+            cell.imageLabel.image = UIImage(data: data)
+        }
         
         return cell
     }
