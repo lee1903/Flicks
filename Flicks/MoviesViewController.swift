@@ -9,13 +9,15 @@
 import UIKit
 import MBProgressHUD
 
-class MoviesViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate{
+class MoviesViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UISearchBarDelegate{
 
+    @IBOutlet weak var searchBarOutlet: UISearchBar!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var networkErrorView: UIView!
 
     
     var movies: [NSDictionary]?
+    var filteredMovies: [NSDictionary]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,6 +30,7 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
         collectionView.insertSubview(refreshControl, atIndex: 0)
         collectionView.dataSource = self
         collectionView.delegate = self
+        searchBarOutlet.delegate = self
         
         MBProgressHUD.showHUDAddedTo(self.view, animated: true)
         
@@ -102,9 +105,7 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
         let image = movie["poster_path"] as! String
         
         let url = NSURL(string: "https://image.tmdb.org/t/p/w342\(image)")
-        let dataornil = NSData(contentsOfURL: url!)
-        
-        if let data = dataornil{
+        if let data = NSData(contentsOfURL: url!){
             cell.imageLabel.image = UIImage(data: data)
         }
         
