@@ -8,21 +8,26 @@
 
 import UIKit
 import MBProgressHUD
+import AFNetworking
 
 class MoviesViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UISearchBarDelegate{
 
-    @IBOutlet weak var searchBarOutlet: UISearchBar!
+    @IBOutlet weak var navItem: UINavigationItem!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var networkErrorView: UIView!
 
     
     var movies: [NSDictionary]?
-    var filteredMovies: [NSDictionary]?
+    var filteredMovies: [NSDictionary]!
+    var endpoint: String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.navigationController?.navigationBarHidden = true
+        let searchBar = UISearchBar()
+        searchBar.sizeToFit()
+        
+        navItem.titleView = searchBar
         
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: "refreshControlAction:", forControlEvents: UIControlEvents.ValueChanged)
@@ -30,7 +35,14 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
         collectionView.insertSubview(refreshControl, atIndex: 0)
         collectionView.dataSource = self
         collectionView.delegate = self
-        searchBarOutlet.delegate = self
+        searchBar.delegate = self
+        
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
+        collectionView.backgroundView = UIView()
+        collectionView.backgroundView!.addGestureRecognizer(tap)
+        
+        let refreshtap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "networkErrorRefresh")
+        networkErrorView.addGestureRecognizer(refreshtap)
         
         MBProgressHUD.showHUDAddedTo(self.view, animated: true)
         
@@ -44,17 +56,20 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewWillAppear(animated: Bool) {
-        self.navigationController?.navigationBarHidden = true
+    func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        navItem.titleView?.endEditing(true)
     }
     
-    override func viewWillDisappear(animated: Bool) {
-        self.navigationController?.navigationBarHidden = false
+    func networkErrorRefresh() {
+        MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+        networkRequest()
     }
+
     
     func networkRequest(){
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string:"https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")
         let request = NSURLRequest(URL: url!)
         let session = NSURLSession(
             configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
@@ -71,13 +86,21 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
                             
                             MBProgressHUD.hideHUDForView(self.view, animated: true)
                             self.movies = responseDictionary["results"] as? [NSDictionary]
+                            self.filteredMovies = self.movies
+                            
+                            self.networkErrorView.hidden = true
+                            self.collectionView.hidden = false
                             
                             self.collectionView.reloadData()
                     }
                 }
+                else{
+                    MBProgressHUD.hideHUDForView(self.view, animated: true)
+                    self.networkErrorView.hidden = false
+                    self.collectionView.hidden = true
+                }
         });
         task.resume()
-
     }
     
     func refreshControlAction(refreshControl: UIRefreshControl) {
@@ -91,8 +114,8 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
     }
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int{
-        if let movies = movies{
-            return movies.count
+        if let filteredMovies = filteredMovies{
+            return filteredMovies.count
         } else{
             return 0
         }
@@ -101,18 +124,43 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell{
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
         
-        let movie = movies![indexPath.row]
+        let movie = filteredMovies[indexPath.row]
         let image = movie["poster_path"] as! String
         
         let url = NSURL(string: "https://image.tmdb.org/t/p/w342\(image)")
-        if let data = NSData(contentsOfURL: url!){
-            cell.imageLabel.image = UIImage(data: data)
-        }
+        cell.alpha = 0
+        cell.imageLabel.setImageWithURL(url!)
+        UIView.animateWithDuration(0.3, animations: { () -> Void in
+            cell.alpha = 1
+        })
         
         return cell
     }
     
+    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
+        dismissKeyboard()
+    }
+    
+    
+    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            filteredMovies = movies
+        } else {
+            filteredMovies = movies!.filter({(dataItem: NSDictionary) -> Bool in
+                let str = dataItem["title"] as! String
+                if str.rangeOfString(searchText, options: .CaseInsensitiveSearch) != nil {
+                    return true
+                } else {
+                    return false
+                }
+            })
+        }
+        collectionView.reloadData()
+    }
+    
+
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        dismissKeyboard()
         self.performSegueWithIdentifier("showDetail", sender: movies![indexPath.row])
     }
     

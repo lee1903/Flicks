@@ -8,12 +8,17 @@
 
 import UIKit
 
-class CellViewController: UIViewController {
+class CellViewController: UIViewController, UIScrollViewDelegate{
+    
+    @IBOutlet weak var navBar: UINavigationItem!
     
     var titleString: String = ""
     var overviewString: String = ""
     var imageString: String = ""
     
+    @IBOutlet weak var scrollView: UIScrollView!
+    
+    @IBOutlet weak var infoView: UIView!
     @IBOutlet weak var titleOutlet: UILabel!
     @IBOutlet weak var overviewOutlet: UILabel!
     @IBOutlet weak var imageOutlet: UIImageView!
@@ -21,12 +26,41 @@ class CellViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        scrollView.delegate = self
+
         let url = NSURL(string: imageString)
-        let data = NSData(contentsOfURL: url!)
+        imageOutlet.setImageWithURL(url!)
         
-        imageOutlet.image = UIImage(data: data!)
+        let image = imageOutlet.image!
+        let colors = image.getColors()
+        
+        infoView.backgroundColor = colors.backgroundColor
+        self.view.backgroundColor = colors.backgroundColor
+        titleOutlet.textColor = colors.primaryColor
+        overviewOutlet.textColor = colors.secondaryColor
+        
         titleOutlet.text = titleString
         overviewOutlet.text = overviewString
+        
+        overviewOutlet.sizeToFit()
+        
+        scrollView.contentSize = CGSize(width: scrollView.frame.size.width, height: infoView.frame.origin.y + infoView.frame.size.height)
+        
+        let p = CGPoint(x: 0, y: scrollView.contentSize.height - scrollView.frame.size.height + 50)
+        //scrollView.setContentOffset(p, animated: true)
+        
+//        UIView.animateWithDuration(1, delay: 1.0, options: UIViewAnimationOptions.TransitionNone, animations: { () -> Void in
+//            
+//            self.scrollView.setContentOffset(p, animated: true)
+//            
+//            }, completion: { (finished: Bool) -> Void in
+//
+//        })
+        
+        let dispatchTime: dispatch_time_t = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
+        dispatch_after(dispatchTime, dispatch_get_main_queue(), {
+            self.scrollView.setContentOffset(p, animated: true)
+        })
 
         // Do any additional setup after loading the view.
     }
@@ -35,6 +69,18 @@ class CellViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        print(scrollView.contentOffset.y + scrollView.frame.size.height)
+        if (scrollView.contentOffset.y + scrollView.frame.size.height) > 555{
+            let alpha = ((scrollView.contentOffset.y + scrollView.frame.size.height) - 555) / 90
+            infoView.alpha = alpha
+        }
+        let alpha = 1.5 - (((scrollView.contentOffset.y + scrollView.frame.size.height) - 372) / 234)
+        imageOutlet.alpha = alpha
+        
+    }
+    
     
 
     /*
