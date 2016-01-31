@@ -20,11 +20,12 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
     var movies: [NSDictionary]?
     var filteredMovies: [NSDictionary]!
     var endpoint: String!
+    var searchBar: UISearchBar!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let searchBar = UISearchBar()
+        searchBar = UISearchBar()
         searchBar.sizeToFit()
         
         navItem.titleView = searchBar
@@ -86,7 +87,10 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
                             
                             MBProgressHUD.hideHUDForView(self.view, animated: true)
                             self.movies = responseDictionary["results"] as? [NSDictionary]
-                            self.filteredMovies = self.movies
+                            
+                            if self.searchBar.text == ""{
+                                self.filteredMovies = self.movies
+                            }
                             
                             self.networkErrorView.hidden = true
                             self.collectionView.hidden = false
@@ -106,10 +110,12 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
     func refreshControlAction(refreshControl: UIRefreshControl) {
         
         // Make network request to fetch latest data
+        dismissKeyboard()
         networkRequest()
         // Do the following when the network request comes back successfully:
         // Update tableView data source
         self.collectionView.reloadData()
+        
         refreshControl.endRefreshing()
     }
     
@@ -161,7 +167,7 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
 
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         dismissKeyboard()
-        self.performSegueWithIdentifier("showDetail", sender: movies![indexPath.row])
+        self.performSegueWithIdentifier("showDetail", sender: filteredMovies![indexPath.row])
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -173,6 +179,18 @@ class MoviesViewController: UIViewController, UICollectionViewDataSource, UIColl
         viewController.imageString = "https://image.tmdb.org/t/p/w342\(image)"
         viewController.titleString = movie["title"] as! String
         viewController.overviewString = movie["overview"] as! String
+        
+        let rating = movie["vote_average"] as! Double
+        let dateString = movie["release_date"] as! String
+        let year = dateString.substringWithRange(Range<String.Index>(start: dateString.startIndex.advancedBy(0), end: dateString.startIndex.advancedBy(4)))
+        let month = dateString.substringWithRange(Range<String.Index>(start: dateString.startIndex.advancedBy(5), end: dateString.startIndex.advancedBy(7)))
+        let day = dateString.substringWithRange(Range<String.Index>(start: dateString.startIndex.advancedBy(8), end: dateString.startIndex.advancedBy(10)))
+        let date = "\(month)/\(day)/\(year)"
+        
+        viewController.dateString = date
+        viewController.rating = rating
+        
+        
     }
     
     

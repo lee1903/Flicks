@@ -15,14 +15,20 @@ class CellViewController: UIViewController, UIScrollViewDelegate{
     var titleString: String = ""
     var overviewString: String = ""
     var imageString: String = ""
+    var dateString: String = ""
+    var rating: Double!
     
     @IBOutlet weak var scrollView: UIScrollView!
     
     @IBOutlet weak var infoView: UIView!
+    @IBOutlet weak var ratingLabel: UILabel!
+    @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var titleOutlet: UILabel!
     @IBOutlet weak var overviewOutlet: UILabel!
     @IBOutlet weak var imageOutlet: UIImageView!
+
     
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -38,29 +44,33 @@ class CellViewController: UIViewController, UIScrollViewDelegate{
         self.view.backgroundColor = colors.backgroundColor
         titleOutlet.textColor = colors.primaryColor
         overviewOutlet.textColor = colors.secondaryColor
+        ratingLabel.textColor = colors.detailColor
+        dateLabel.textColor = colors.detailColor
         
         titleOutlet.text = titleString
         overviewOutlet.text = overviewString
+        ratingLabel.text = "Rating: \(rating)/10"
+        dateLabel.text = dateString
         
         overviewOutlet.sizeToFit()
         
         scrollView.contentSize = CGSize(width: scrollView.frame.size.width, height: infoView.frame.origin.y + infoView.frame.size.height)
         
-        let p = CGPoint(x: 0, y: scrollView.contentSize.height - scrollView.frame.size.height + 50)
+        let p = CGPoint(x: 0, y: scrollView.contentSize.height - scrollView.frame.size.height + 115)
         //scrollView.setContentOffset(p, animated: true)
         
-//        UIView.animateWithDuration(1, delay: 1.0, options: UIViewAnimationOptions.TransitionNone, animations: { () -> Void in
-//            
-//            self.scrollView.setContentOffset(p, animated: true)
-//            
-//            }, completion: { (finished: Bool) -> Void in
-//
-//        })
-        
-        let dispatchTime: dispatch_time_t = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
-        dispatch_after(dispatchTime, dispatch_get_main_queue(), {
+        UIView.animateWithDuration(1, delay: 0.5, options: UIViewAnimationOptions.TransitionNone, animations: { () -> Void in
+            
             self.scrollView.setContentOffset(p, animated: true)
+            
+            }, completion: { (finished: Bool) -> Void in
+
         })
+        
+//        let dispatchTime: dispatch_time_t = dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC)))
+//        dispatch_after(dispatchTime, dispatch_get_main_queue(), {
+//            self.scrollView.setContentOffset(p, animated: true)
+//        })
 
         // Do any additional setup after loading the view.
     }

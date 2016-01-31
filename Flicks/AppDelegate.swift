@@ -33,8 +33,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         topRatedNavigationController.tabBarItem.image = UIImage(named: "top_rated")
         
         let tabBarController = UITabBarController()
+        
         tabBarController.viewControllers = [nowPlayingNavigationController, topRatedNavigationController]
         
+        tabBarController.tabBar.tintColor = UIColor.blackColor()
         window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
         
