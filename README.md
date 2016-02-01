@@ -15,15 +15,17 @@ The following **required** functionality is complete:
 
 The following **optional** features are implemented:
 
-- [ ] User sees an error message when there's a networking error.
+- [x] User sees an error message when there's a networking error.
 - [x] Movies are displayed using a CollectionView instead of a TableView.
-- [ ] User can search for a movie.
-- [ ] All images fade in as they are loading.
+- [x] User can search for a movie.
+- [x] All images fade in as they are loading.
 - [x] Customize the UI.
 
 The following **additional** features are implemented:
 
-- [ ] List anything else that you can get done to improve the app functionality!
+- [x] Detailed view automatically scrolls down to the movie info
+- [x] Dominant colors are extracted from movie poster and background of detailed view is set accordingly
+- [x] Text and poster in detailed view fade when scrolling
 
 ## Video Walkthrough 
 
