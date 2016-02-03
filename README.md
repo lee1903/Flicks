@@ -51,11 +51,11 @@ Describe any challenges encountered while building the app.
     See the License for the specific language governing permissions and
     limitations under the License.
 
-# Project 2 - *Name of App Here*
+# Project 2 - Flicks Part 2
 
 **Name of your app** is a movies app displaying box office and top rental DVDs using [The Movie Database API](http://docs.themoviedb.apiary.io/#).
 
-Time spent: **X** hours spent in total
+Time spent: 10 hours spent in total
 
 ## User Stories
 
@@ -85,7 +85,7 @@ Please list two areas of the assignment you'd like to **discuss further with you
 
 Here's a walkthrough of implemented user stories:
 
-<img src='https://dl.dropboxusercontent.com/u/30186985/flicks.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+https://dl.dropboxusercontent.com/u/30186985/flicks.gif
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
